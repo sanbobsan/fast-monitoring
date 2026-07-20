@@ -13,7 +13,7 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=30d'
     extra_hosts:
-      - "host.docker.internal:172.30.0.1" 
+      - "host.docker.internal:172.30.0.1"
     networks:
       - net
 
@@ -26,6 +26,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
     ports:
       - "127.0.0.1:${GRAFANA_PORT}:3000"
     networks:
