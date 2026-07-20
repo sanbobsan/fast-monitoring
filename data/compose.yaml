@@ -13,7 +13,7 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=30d'
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "host.docker.internal:172.30.0.1" 
     networks:
       - net
 
@@ -45,7 +45,7 @@ services:
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|boot|volume1)($$|/)'
-      - '--web.listen-address=0.0.0.0:${NODE_PORT}'
+      - '--web.listen-address=172.30.0.1:${NODE_PORT}'
 
 volumes:
   prometheus_data:
@@ -56,3 +56,6 @@ volumes:
 networks:
   net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
