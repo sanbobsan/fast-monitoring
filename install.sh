@@ -12,7 +12,7 @@ mkdir -p "${APP_DIR}"
 mkdir -p "${APP_DIR}/prometheus"
 
 cp ./data/compose.yaml "${APP_DIR}"
-cp ./data/prometheus.yaml "${APP_DIR}/prometheus/"
+envsubst < ./data/prometheus.template.yaml > "${APP_DIR}/prometheus/prometheus.yaml"
 
 cd "${APP_DIR}"
 
