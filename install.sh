@@ -1,3 +1,4 @@
+die() { echo "Error: $1" >&2; exit 1; }
 
 if [ -f .env ]; then
     while IFS= read -r line || [ -n "$line" ]; do
@@ -11,26 +12,26 @@ fi
 while [ $# -gt 0 ]; do
     case "$1" in
         --app_dir)
-            [ -z "$2" ] && { echo "Error: --app_dir requires a non-empty value" >&2; exit 1; }
-            [ "${2#-}" != "$2" ] && { echo "Error: --app_dir expects a value, got '$2'" >&2; exit 1; }
+            [ -z "$2" ] && die "--app_dir requires a non-empty value"
+            [ "${2#-}" != "$2" ] && die "--app_dir expects a value, got '$2'"
             APP_DIR="$2"; shift 2 ;;
         --grafana_port)
-            [ -z "$2" ] && { echo "Error: --grafana_port requires a non-empty value" >&2; exit 1; }
-            [ "${2#-}" != "$2" ] && { echo "Error: --grafana_port expects a value, got '$2'" >&2; exit 1; }
+            [ -z "$2" ] && die "--grafana_port requires a non-empty value"
+            [ "${2#-}" != "$2" ] && die "--grafana_port expects a value, got '$2'"
             GRAFANA_PORT="$2"; shift 2 ;;
         --grafana_user)
-            [ -z "$2" ] && { echo "Error: --grafana_user requires a non-empty value" >&2; exit 1; }
-            [ "${2#-}" != "$2" ] && { echo "Error: --grafana_user expects a value, got '$2'" >&2; exit 1; }
+            [ -z "$2" ] && die "--grafana_user requires a non-empty value"
+            [ "${2#-}" != "$2" ] && die "--grafana_user expects a value, got '$2'"
             GRAFANA_USER="$2"; shift 2 ;;
         --grafana_password)
-            [ -z "$2" ] && { echo "Error: --grafana_password requires a non-empty value" >&2; exit 1; }
-            [ "${2#-}" != "$2" ] && { echo "Error: --grafana_password expects a value, got '$2'" >&2; exit 1; }
+            [ -z "$2" ] && die "--grafana_password requires a non-empty value"
+            [ "${2#-}" != "$2" ] && die "--grafana_password expects a value, got '$2'"
             GRAFANA_PASSWORD="$2"; shift 2 ;;
         --node_port)
-            [ -z "$2" ] && { echo "Error: --node_port requires a non-empty value" >&2; exit 1; }
-            [ "${2#-}" != "$2" ] && { echo "Error: --node_port expects a value, got '$2'" >&2; exit 1; }
+            [ -z "$2" ] && die "--node_port requires a non-empty value"
+            [ "${2#-}" != "$2" ] && die "--node_port expects a value, got '$2'"
             NODE_PORT="$2"; shift 2 ;;
-        *) echo "Unknown option: $1" >&2; exit 1 ;;
+        *) die "Unknown option: $1"
     esac
 done
 
@@ -50,27 +51,30 @@ else
     MODE="remote"
 fi
 
-mkdir -p "${APP_DIR}"
-mkdir -p "${APP_DIR}/prometheus"
-mkdir -p "${APP_DIR}/grafana"
+mkdir -p "${APP_DIR}" 2>/dev/null || die "Cannot create ${APP_DIR}. Try: curl ... | sudo bash"
+mkdir -p "${APP_DIR}/prometheus" "${APP_DIR}/grafana" 2>/dev/null || die "Cannot create subdirectories in ${APP_DIR}"
 
 if [ "$MODE" = "local" ]; then
-    cp ./config/compose.yaml "${APP_DIR}"
+    [ -f ./config/compose.yaml ] || die "Missing ./config/compose.yaml"
+    cp ./config/compose.yaml "${APP_DIR}" || die "Failed to copy compose.yaml"
 else
-    curl -fSsL "$RAW_BASE/config/compose.yaml" -o "${APP_DIR}/compose.yaml"
+    curl -fSsL "$RAW_BASE/config/compose.yaml" -o "${APP_DIR}/compose.yaml" || die "Failed to download compose.yaml"
 fi
 
 if [ "$MODE" = "local" ]; then
-    envsubst < ./config/prometheus.template.yaml > "${APP_DIR}/prometheus/prometheus.yaml"
+    [ -f ./config/prometheus.template.yaml ] || die "Missing ./config/prometheus.template.yaml"
+    envsubst < ./config/prometheus.template.yaml > "${APP_DIR}/prometheus/prometheus.yaml" || die "Failed to process prometheus template"
 else
-    curl -fSsL "$RAW_BASE/config/prometheus.template.yaml" | envsubst > "${APP_DIR}/prometheus/prometheus.yaml"
+    curl -fSsL "$RAW_BASE/config/prometheus.template.yaml" | envsubst > "${APP_DIR}/prometheus/prometheus.yaml" || die "Failed to download or process prometheus template"
 fi
 
 if [ "$MODE" = "local" ]; then
-    cp ./config/grafana/* "${APP_DIR}/grafana/"
+    ls ./config/grafana/*.yaml >/dev/null 2>&1 || die "No grafana datasource files in ./config/grafana/"
+    cp ./config/grafana/* "${APP_DIR}/grafana/" || die "Failed to copy grafana datasource"
 else
-    curl -fSsL "$RAW_BASE/config/grafana/datasources.yaml" -o "${APP_DIR}/grafana/datasources.yaml"
+    curl -fSsL "$RAW_BASE/config/grafana/datasources.yaml" -o "${APP_DIR}/grafana/datasources.yaml" || die "Failed to download datasources.yaml"
 fi
 
-cd "${APP_DIR}"
+cd "${APP_DIR}" || die "Cannot access ${APP_DIR}"
+
 docker compose up -d
