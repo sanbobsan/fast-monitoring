@@ -11,6 +11,15 @@ fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
+        --help|-h)
+            echo "Usage: remove.sh [OPTIONS]"
+            echo ""
+            echo "Remove fast-monitoring stack (docker compose down -v + rm -rf)"
+            echo ""
+            echo "Options:"
+            echo "  --app_dir DIR           Deployment directory (default: /opt/fast-monitoring)"
+            echo "  --help, -h              Show this help"
+            exit 0 ;;
         --app_dir)
             [ -z "$2" ] && die "--app_dir requires a non-empty value"
             [ "${2#-}" != "$2" ] && die "--app_dir expects a value, got '$2'"

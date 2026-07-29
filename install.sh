@@ -11,6 +11,19 @@ fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
+        --help|-h)
+            echo "Usage: install.sh [OPTIONS]"
+            echo ""
+            echo "Deploy fast-monitoring stack (Grafana + Prometheus + Node Exporter)"
+            echo ""
+            echo "Options:"
+            echo "  --app_dir DIR           Deployment directory (default: /opt/fast-monitoring)"
+            echo "  --grafana_port PORT     Grafana port (default: 3000)"
+            echo "  --grafana_user USER     Grafana admin user (default: user)"
+            echo "  --grafana_password PASS Grafana admin password (default: password)"
+            echo "  --node_port PORT        Node exporter port (default: 9100)"
+            echo "  --help, -h              Show this help"
+            exit 0 ;;
         --app_dir)
             [ -z "$2" ] && die "--app_dir requires a non-empty value"
             [ "${2#-}" != "$2" ] && die "--app_dir expects a value, got '$2'"
