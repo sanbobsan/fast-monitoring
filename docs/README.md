@@ -2,6 +2,17 @@
 
 Fast server monitoring setup (Grafana + Prometheus + Node Exporter) in an isolated Docker environment. Single command to deploy — monitor CPU, RAM, disk, and network of any Linux server.
 
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Firewall](#firewall)
+- [Configuration](#configuration)
+- [Post-install](#post-install)
+- [Management](#management)
+- [Architecture](#architecture)
+- [Removal](#removal)
+
 ## Quick Start
 
 ```bash
