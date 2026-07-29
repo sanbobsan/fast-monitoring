@@ -2,6 +2,17 @@
 
 Fast server monitoring setup (Grafana + Prometheus + Node Exporter) in an isolated Docker environment. Single command to deploy — monitor CPU, RAM, disk, and network of any Linux server.
 
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Firewall](#firewall)
+- [Configuration](#configuration)
+- [Post-install](#post-install)
+- [Management](#management)
+- [Architecture](#architecture)
+- [Removal](#removal)
+
 ## Quick Start
 
 ```bash
@@ -9,6 +20,8 @@ curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/inst
 ```
 
 That's it. The stack is deployed to `/opt/fast-monitoring/` (default) and starts automatically.
+
+Removal is just as easy — see [Removal](#removal).
 
 - **Grafana** — `http://localhost:3000` (user: `user`, password: `password`)
 - **Prometheus** — internal, reachable via Docker network
@@ -39,9 +52,18 @@ docker compose exec prometheus wget -qO- http://host.docker.internal:9100/metric
 
 If the command hangs or fails, apply the appropriate rule:
 
-- **UFW**: `sudo ufw allow from 172.30.0.0/24 to any port 9100 proto tcp`
-- **firewalld**: `sudo firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=172.30.0.0/24 port port=9100 protocol=tcp accept' && sudo firewall-cmd --reload`
-- **iptables** (DOCKER-USER chain, persists across Docker restarts): `sudo iptables -I DOCKER-USER -s 172.30.0.0/24 -p tcp --dport 9100 -j ACCEPT`
+- **UFW**:
+  ```bash
+  sudo ufw allow from 172.30.0.0/24 to any port 9100 proto tcp
+  ```
+- **firewalld**:
+  ```bash
+  sudo firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=172.30.0.0/24 port port=9100 protocol=tcp accept' && sudo firewall-cmd --reload
+  ```
+- **iptables** (DOCKER-USER chain, persists across Docker restarts):
+  ```bash
+  sudo iptables -I DOCKER-USER -s 172.30.0.0/24 -p tcp --dport 9100 -j ACCEPT
+  ```
 
 The install script attempts to detect active firewalls and prints a warning if
 Prometheus cannot reach Node Exporter after deployment.
@@ -78,14 +100,20 @@ curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/inst
 
 Place a `.env` file in the current working directory before running the script. The script reads it automatically:
 
-```bash
-mkdir -p /tmp/fm-install && cd /tmp/fm-install
-curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/.env.example -o .env
-# edit .env (APP_DIR, GRAFANA_PORT, etc.)
-curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/install.sh | sudo bash
-# script reads .env from the current directory automatically
-rm -rf /tmp/fm-install  # temp directory can be cleaned up after install
-```
+1. Download the example config:
+   ```bash
+   mkdir -p /tmp/fm-install && cd /tmp/fm-install
+   curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/.env.example -o .env
+   ```
+2. Edit `.env` (APP_DIR, GRAFANA_PORT, etc.)
+3. Run the installer (reads `.env` from the current directory):
+   ```bash
+   curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/install.sh | sudo bash
+   ```
+4. Clean up (optional):
+   ```bash
+   rm -rf /tmp/fm-install
+   ```
 
 `REPO` and `BRANCH` are not available as CLI flags but can be set via `.env` to install from a custom fork or branch:
 
@@ -164,7 +192,9 @@ docker compose -f /opt/fast-monitoring/compose.yaml -p fast-monitoring up -d
 ```bash
 # remove the default location (/opt/fast-monitoring)
 curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/remove.sh | sudo bash
+```
 
+```bash
 # remove a custom location
 curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/remove.sh | sudo bash -s -- --app_dir /opt/mon
 ```
