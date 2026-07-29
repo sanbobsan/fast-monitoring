@@ -40,6 +40,8 @@ RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
 
 cd "${APP_DIR}" 2>/dev/null || die "Directory ${APP_DIR} does not exist"
 
+[ -f "${APP_DIR}/.fast-monitoring" ] || die "${APP_DIR} is not a fast-monitoring project (missing .fast-monitoring)"
+
 docker compose down -v 2>/dev/null || true
 
 rm -rf "${APP_DIR}" 2>/dev/null || die "Failed to remove ${APP_DIR}. Re-run with: curl -fSsL ${RAW_BASE}/remove.sh | sudo bash"

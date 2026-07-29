@@ -103,3 +103,9 @@ NODE_PORT=${NODE_PORT}
 # NODE_PORT is baked into prometheus/prometheus.yaml at install time.
 # To change NODE_PORT, edit prometheus/prometheus.yaml directly or re-deploy.
 EOF
+
+cat > "${APP_DIR}/.fast-monitoring" << EOF
+# fast-monitoring deployment marker
+INSTALL_DATE=$(date +%Y-%m-%d)
+NODE_PORT=${NODE_PORT}
+EOF
