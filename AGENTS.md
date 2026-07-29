@@ -127,40 +127,60 @@ Logs may show repeated `401` errors from `remote_addr=172.30.0.1` (Docker bridge
 ### Branching model
 
 - **`main`** — stable releases. History is clean (one squash commit per release).
-- **`dev`** — active development. Full commit history.
+- **`dev`** — active development. Recreated after each release (see below).
 
 ### Release cycle
 
-1. **Bump version** in `dev`:
+1. **Development** in `dev`:
    ```bash
-   # Update VERSION="1.0.0" → "1.1.0" in install.sh
-   commit type: chore
-   commit message: "chore: bump version to v1.1.0"
+   git checkout dev
+   # make changes, commit
+   git add .
+   git commit -m "feat: ..."
+   git commit -m "fix: ..."
    ```
 
-2. **Create PR** (I do this):
+2. **Push and create PR**:
    ```bash
+   git push origin dev
    gh pr create --base main --head dev \
-     --title "feat: summary of changes in this release (v1.1.0)" \
-     --body "Full changelog from dev commits"
-   ```
+     --title "feat: summary of changes (vX.Y.Z)" \
+     --body "- summary of change one
+   - summary of change two
 
-3. **Squash merge** (I do this):
+   Closes #N"
+   ```
+   PR title follows **conventional commits** — it becomes the squash commit subject on `main`.
+   PR body uses a bullet list with lowercase start, no trailing dot.
+   `Closes #N` at the end — GitHub auto-closes the referenced issues on squash merge.
+
+3. **Squash merge** (GitHub setting: "Pull request title and description"):
    ```bash
    gh pr merge --squash --delete-branch
    ```
-   Squash commit message follows **conventional commits** (see Conventions),
-   NOT "Release vX.Y.Z". The version is recorded only in the git tag.
 
-4. **Tag** (I do this):
+4. **Tag**:
    ```bash
-   git tag v1.1.0 && git push origin v1.1.0
+   git checkout main && git pull origin main
+   git tag vX.Y.Z && git push origin vX.Y.Z
    ```
 
-5. **Sync dev with main** (I do this):
+5. **Recreate dev** (clean sync):
    ```bash
-   git checkout dev && git merge main && git push
+   git checkout main
+   git pull origin main
+   git branch -D dev
+   git checkout -b dev
+   git push origin dev
    ```
+
+#### Automation alias (optional)
+
+```bash
+git config --global alias.sync-dev "!git checkout main && git pull origin main && git branch -D dev && git checkout -b dev && git push origin dev"
+```
+
+After step 3, run: `git sync-dev`
 
 ### Hotfix
 
@@ -168,8 +188,8 @@ For urgent fixes that cannot wait for the next dev cycle:
 
 1. Branch from `main`: `git checkout -b fix/xxx main`
 2. Commit the fix
-3. PR to `main` (same squash + tag flow)
-4. Sync dev: `git checkout dev && git merge main && git push`
+3. Push and PR to `main` (same squash + tag flow)
+4. Recreate dev: `git sync-dev` (or the 5-step recreate above)
 5. Patch version bump: `chore: bump version to v1.0.1`
 
 ## Conventions
@@ -191,6 +211,17 @@ not:
 ```text
 Release v1.1.0     ← avoid
 ```
+
+### PR title and body
+
+- **PR title** follows conventional commits (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`).
+  It becomes the squash commit message on `main`.
+- **PR body** uses a bullet list with `- ` prefix, lowercase start, no trailing dot.
+  Ends with `Closes #N` lines to auto-close referenced issues.
+
+### GitHub setting
+
+Squash merge must use **"Pull request title and description"** as the default commit message.
 
 ### Code
 
