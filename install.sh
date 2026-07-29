@@ -54,6 +54,7 @@ export GRAFANA_USER="${GRAFANA_USER:-user}"
 export GRAFANA_PASSWORD="${GRAFANA_PASSWORD:-password}"
 export NODE_PORT="${NODE_PORT:-9100}"
 
+VERSION="1.0.0"
 REPO="sanbobsan/fast-monitoring"
 BRANCH="main"
 RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
@@ -106,6 +107,7 @@ EOF
 
 cat > "${APP_DIR}/.fast-monitoring" << EOF
 # fast-monitoring deployment marker
+VERSION=${VERSION}
 INSTALL_DATE=$(date +%Y-%m-%d)
 NODE_PORT=${NODE_PORT}
 EOF

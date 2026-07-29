@@ -34,6 +34,7 @@ export GRAFANA_USER="${GRAFANA_USER:-user}"
 export GRAFANA_PASSWORD="${GRAFANA_PASSWORD:-password}"
 export NODE_PORT="${NODE_PORT:-9100}"
 
+VERSION="1.0.0"
 REPO="sanbobsan/fast-monitoring"
 BRANCH="main"
 RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"

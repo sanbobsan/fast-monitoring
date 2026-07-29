@@ -61,6 +61,7 @@
 ## Conventions
 
 - Коммиты — conventional commits (`feat:`, `fix:`, `docs:`, `chore:`)
+- Версионирование — semver: `VERSION` в `install.sh` + git tag `v{major}.{minor}.{patch}`
 - Bash-скрипты без строгих правил, shellcheck приветствуется
 - Документация на русском языке (в `docs/`)
 - Тестовый фреймворк отсутствует — проверка ручным запуском скриптов
