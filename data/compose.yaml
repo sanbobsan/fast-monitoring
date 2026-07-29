@@ -1,4 +1,4 @@
-name: automon
+name: fast-monitoring
 
 services:
   prometheus:
