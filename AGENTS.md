@@ -16,7 +16,8 @@
 │   └── grafana/
 │       └── datasources.yaml        # Provisioning datasource для Grafana
 ├── docs/
-│   └── README.md                   # Документация (на русском)
+│   ├── README.md                   # Документация (на английском)
+│   └── note.md                     # Технические заметки (на русском)
 └── .gitignore
 ```
 
@@ -63,5 +64,5 @@
 - Коммиты — conventional commits (`feat:`, `fix:`, `docs:`, `chore:`)
 - Версионирование — semver: `VERSION` в `install.sh` + git tag `v{major}.{minor}.{patch}`
 - Bash-скрипты без строгих правил, shellcheck приветствуется
-- Документация на русском языке (в `docs/`)
+- Документация на английском языке (`docs/README.md`), технические заметки на русском (`docs/note.md`)
 - Тестовый фреймворк отсутствует — проверка ручным запуском скриптов
