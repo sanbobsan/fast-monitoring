@@ -19,12 +19,15 @@ while [ $# -gt 0 ]; do
             echo ""
             echo "Options:"
             echo "  --app_dir DIR           Deployment directory (default: /opt/fast-monitoring)"
+            echo "  --force                 Skip .fast-monitoring check"
             echo "  --help, -h              Show this help"
             exit 0 ;;
         --app_dir)
             [ -z "$2" ] && die "--app_dir requires a non-empty value"
             [ "${2#-}" != "$2" ] && die "--app_dir expects a value, got '$2'"
             APP_DIR="$2"; shift 2 ;;
+        --force)
+            FORCE=1; shift ;;
         *) die "Unknown option: $1"
     esac
 done
@@ -41,7 +44,7 @@ RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
 
 cd "${APP_DIR}" 2>/dev/null || die "Directory ${APP_DIR} does not exist"
 
-[ -f "${APP_DIR}/.fast-monitoring" ] || die "${APP_DIR} is not a fast-monitoring project (missing .fast-monitoring)"
+[ "$FORCE" = "1" ] || [ -f "${APP_DIR}/.fast-monitoring" ] || die "${APP_DIR} is not a fast-monitoring project (missing .fast-monitoring)"
 
 docker compose down -v 2>/dev/null || true
 
