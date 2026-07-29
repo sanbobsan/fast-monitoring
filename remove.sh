@@ -10,8 +10,10 @@ fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
-        --app_dir) APP_DIR="$2"; shift 2 ;;
-        *) echo "Unknown option: $1"; exit 1 ;;
+        --app_dir)
+            [ $# -lt 2 ] && { echo "Error: --app_dir requires a value" >&2; exit 1; }
+            APP_DIR="$2"; shift 2 ;;
+        *) echo "Unknown option: $1" >&2; exit 1 ;;
     esac
 done
 
