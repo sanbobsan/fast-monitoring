@@ -11,19 +11,24 @@ fi
 while [ $# -gt 0 ]; do
     case "$1" in
         --app_dir)
-            [ $# -lt 2 ] && { echo "Error: --app_dir requires a value" >&2; exit 1; }
+            [ -z "$2" ] && { echo "Error: --app_dir requires a non-empty value" >&2; exit 1; }
+            [ "${2#-}" != "$2" ] && { echo "Error: --app_dir expects a value, got '$2'" >&2; exit 1; }
             APP_DIR="$2"; shift 2 ;;
         --grafana_port)
-            [ $# -lt 2 ] && { echo "Error: --grafana_port requires a value" >&2; exit 1; }
+            [ -z "$2" ] && { echo "Error: --grafana_port requires a non-empty value" >&2; exit 1; }
+            [ "${2#-}" != "$2" ] && { echo "Error: --grafana_port expects a value, got '$2'" >&2; exit 1; }
             GRAFANA_PORT="$2"; shift 2 ;;
         --grafana_user)
-            [ $# -lt 2 ] && { echo "Error: --grafana_user requires a value" >&2; exit 1; }
+            [ -z "$2" ] && { echo "Error: --grafana_user requires a non-empty value" >&2; exit 1; }
+            [ "${2#-}" != "$2" ] && { echo "Error: --grafana_user expects a value, got '$2'" >&2; exit 1; }
             GRAFANA_USER="$2"; shift 2 ;;
         --grafana_password)
-            [ $# -lt 2 ] && { echo "Error: --grafana_password requires a value" >&2; exit 1; }
+            [ -z "$2" ] && { echo "Error: --grafana_password requires a non-empty value" >&2; exit 1; }
+            [ "${2#-}" != "$2" ] && { echo "Error: --grafana_password expects a value, got '$2'" >&2; exit 1; }
             GRAFANA_PASSWORD="$2"; shift 2 ;;
         --node_port)
-            [ $# -lt 2 ] && { echo "Error: --node_port requires a value" >&2; exit 1; }
+            [ -z "$2" ] && { echo "Error: --node_port requires a non-empty value" >&2; exit 1; }
+            [ "${2#-}" != "$2" ] && { echo "Error: --node_port expects a value, got '$2'" >&2; exit 1; }
             NODE_PORT="$2"; shift 2 ;;
         *) echo "Unknown option: $1" >&2; exit 1 ;;
     esac
