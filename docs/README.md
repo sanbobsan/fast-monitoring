@@ -30,14 +30,15 @@ curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/inst
 
 ### 2. .env file
 
-Download `.env.example`, fill it, and run the script alongside it:
+Download `.env.example`, fill it, and run the script from the same directory:
 
 ```bash
-curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/.env.example -o /tmp/.env
-# edit /tmp/.env (APP_DIR, GRAFANA_PORT, etc.)
+mkdir -p /tmp/fm-install && cd /tmp/fm-install
+curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/.env.example -o .env
+# edit .env (APP_DIR, GRAFANA_PORT, etc.)
 curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/install.sh | sudo bash
-# script reads /tmp/.env automatically
-# /tmp/.env can be removed after install
+# script reads .env from the current directory automatically
+rm -rf /tmp/fm-install  # clean up after install
 ```
 
 ### Available options
