@@ -10,7 +10,7 @@
 ├── install.sh                      # Деплой стека (docker compose up -d)
 ├── remove.sh                       # Снос стека (docker compose down -v + rm -rf)
 ├── .env.example                    # Шаблон конфигурации
-├── data/
+├── config/
 │   ├── compose.yaml                # Docker Compose (prometheus, grafana, node-exporter)
 │   ├── prometheus.template.yaml    # Шаблон конфига Prometheus (envsubst)
 │   └── grafana/
