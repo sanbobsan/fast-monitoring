@@ -101,6 +101,25 @@ else
     curl -fSsL "$RAW_BASE/config/grafana/datasources.yaml" -o "${APP_DIR}/grafana/datasources.yaml" || die "Failed to download datasources.yaml"
 fi
 
+cat > "${APP_DIR}/.env" << EOF
+# fast-monitoring configuration
+APP_DIR=${APP_DIR}
+GRAFANA_PORT=${GRAFANA_PORT}
+GRAFANA_USER=${GRAFANA_USER}
+GRAFANA_PASSWORD=${GRAFANA_PASSWORD}
+NODE_PORT=${NODE_PORT}
+
+# NODE_PORT is baked into prometheus/prometheus.yaml at install time.
+# To change NODE_PORT, edit prometheus/prometheus.yaml directly or re-deploy.
+EOF
+
+cat > "${APP_DIR}/.fast-monitoring" << EOF
+# fast-monitoring deployment marker
+VERSION=${VERSION}
+INSTALL_DATE=$(date +%Y-%m-%d)
+NODE_PORT=${NODE_PORT}
+EOF
+
 cd "${APP_DIR}" || die "Cannot access ${APP_DIR}"
 
 docker compose up -d
@@ -137,22 +156,3 @@ if ! docker compose exec -T prometheus wget -qO- -T 5 "http://host.docker.intern
     echo "  After applying the fix, run: docker compose restart prometheus"
     echo ""
 fi
-
-cat > "${APP_DIR}/.env" << EOF
-# fast-monitoring configuration
-APP_DIR=${APP_DIR}
-GRAFANA_PORT=${GRAFANA_PORT}
-GRAFANA_USER=${GRAFANA_USER}
-GRAFANA_PASSWORD=${GRAFANA_PASSWORD}
-NODE_PORT=${NODE_PORT}
-
-# NODE_PORT is baked into prometheus/prometheus.yaml at install time.
-# To change NODE_PORT, edit prometheus/prometheus.yaml directly or re-deploy.
-EOF
-
-cat > "${APP_DIR}/.fast-monitoring" << EOF
-# fast-monitoring deployment marker
-VERSION=${VERSION}
-INSTALL_DATE=$(date +%Y-%m-%d)
-NODE_PORT=${NODE_PORT}
-EOF
