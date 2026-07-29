@@ -1,3 +1,4 @@
+VERSION="1.1.0"
 die() { echo "Error: $1" >&2; exit 1; }
 
 if [ -f .env ]; then
@@ -22,6 +23,7 @@ while [ $# -gt 0 ]; do
             echo "  --grafana_user USER     Grafana admin user (default: user)"
             echo "  --grafana_password PASS Grafana admin password (default: password)"
             echo "  --node_port PORT        Node exporter port (default: 9100)"
+            echo "  --dev                   Install from dev branch (pre-release)"
             echo "  --help, -h              Show this help"
             exit 0 ;;
         --app_dir)
@@ -44,6 +46,8 @@ while [ $# -gt 0 ]; do
             [ -z "$2" ] && die "--node_port requires a non-empty value"
             [ "${2#-}" != "$2" ] && die "--node_port expects a value, got '$2'"
             NODE_PORT="$2"; shift 2 ;;
+        --dev)
+            BRANCH="dev"; shift ;;
         *) die "Unknown option: $1"
     esac
 done
@@ -54,9 +58,8 @@ export GRAFANA_USER="${GRAFANA_USER:-user}"
 export GRAFANA_PASSWORD="${GRAFANA_PASSWORD:-password}"
 export NODE_PORT="${NODE_PORT:-9100}"
 
-VERSION="1.0.0"
-REPO="sanbobsan/fast-monitoring"
-BRANCH="main"
+REPO="${REPO:-sanbobsan/fast-monitoring}"
+BRANCH="${BRANCH:-main}"
 RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
 
 if [ -f "./config/compose.yaml" ]; then
@@ -92,6 +95,39 @@ fi
 cd "${APP_DIR}" || die "Cannot access ${APP_DIR}"
 
 docker compose up -d
+
+echo "Checking Node Exporter connectivity..."
+sleep 5
+if ! docker compose exec -T prometheus wget -qO- -T 5 "http://host.docker.internal:${NODE_PORT}/metrics" >/dev/null 2>&1; then
+    echo ""
+    echo "⚠ Prometheus cannot reach Node Exporter at host.docker.internal:${NODE_PORT}"
+    echo "  This is usually caused by a firewall blocking traffic from the Docker"
+    echo "  bridge network (172.30.0.0/24) to port ${NODE_PORT} on the host."
+    echo ""
+    detected=false
+    if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -qi active; then
+        detected=true
+        echo "  Detected: UFW is active."
+        echo "  Fix it with:"
+        echo "    sudo ufw allow from 172.30.0.0/24 to any port ${NODE_PORT} proto tcp"
+        echo ""
+    fi
+    if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state 2>/dev/null | grep -q running; then
+        detected=true
+        echo "  Detected: firewalld is active."
+        echo "  Fix it with:"
+        echo "    sudo firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=172.30.0.0/24 port port=${NODE_PORT} protocol=tcp accept'"
+        echo "    sudo firewall-cmd --reload"
+        echo ""
+    fi
+    if [ "$detected" = false ]; then
+        echo "  No recognized firewall detected, but the connection failed."
+        echo "  Check your iptables/nftables rules for the Docker bridge."
+        echo ""
+    fi
+    echo "  After applying the fix, run: docker compose restart prometheus"
+    echo ""
+fi
 
 cat > "${APP_DIR}/.env" << EOF
 # fast-monitoring configuration

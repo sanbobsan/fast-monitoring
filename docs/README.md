@@ -20,6 +20,32 @@ That's it. The stack is deployed to `/opt/fast-monitoring/` (default) and starts
 - `curl` — for downloading the script
 - `envsubst` — for template processing (part of `gettext`, usually pre-installed)
 
+## Firewall
+
+Node Exporter uses `network_mode: host` and listens on the Docker bridge interface
+(`172.30.0.1:NODE_PORT`). Prometheus scrapes it through the Docker bridge network.
+If a firewall (UFW, firewalld, iptables, nftables) blocks traffic from the Docker
+bridge subnet (`172.30.0.0/24`) to `NODE_PORT`, Prometheus will not receive any
+Node Exporter metrics.
+
+**Symptom**: Grafana connects to Prometheus successfully, but Node Exporter metrics
+are missing. Prometheus target `node-local` shows `health: "down"` with error
+`context deadline exceeded`.
+
+Check connectivity manually:
+```bash
+docker compose exec prometheus wget -qO- http://host.docker.internal:9100/metrics
+```
+
+If the command hangs or fails, apply the appropriate rule:
+
+- **UFW**: `sudo ufw allow from 172.30.0.0/24 to any port 9100 proto tcp`
+- **firewalld**: `sudo firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=172.30.0.0/24 port port=9100 protocol=tcp accept' && sudo firewall-cmd --reload`
+- **iptables** (DOCKER-USER chain, persists across Docker restarts): `sudo iptables -I DOCKER-USER -s 172.30.0.0/24 -p tcp --dport 9100 -j ACCEPT`
+
+The install script attempts to detect active firewalls and prints a warning if
+Prometheus cannot reach Node Exporter after deployment.
+
 ## Configuration
 
 All options are optional — defaults are used for any omitted value.
@@ -35,6 +61,7 @@ You can configure the stack in two ways.
 | `--grafana_user` | `GRAFANA_USER` | `user` | Grafana admin login |
 | `--grafana_password` | `GRAFANA_PASSWORD` | `password` | Grafana admin password |
 | `--node_port` | `NODE_PORT` | `9100` | Node Exporter port on Docker bridge |
+| `--dev` | `BRANCH` | `main` | Install from `dev` branch (pre-release testing) |
 
 ### 1. CLI arguments
 
@@ -58,6 +85,12 @@ curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/.env
 curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/install.sh | sudo bash
 # script reads .env from the current directory automatically
 rm -rf /tmp/fm-install  # temp directory can be cleaned up after install
+```
+
+`REPO` and `BRANCH` are not available as CLI flags but can be set via `.env` to install from a custom fork or branch:
+
+```bash
+REPO=myfork/fast-monitoring BRANCH=myfeature ./install.sh
 ```
 
 ### Precedence (highest → lowest)
