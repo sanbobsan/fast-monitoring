@@ -25,6 +25,13 @@
 - `./install.sh` — установка: копирует файлы в `$APP_DIR`, запускает `docker compose up -d`
 - `./remove.sh` — удаление: `docker compose down -v` + удаляет `$APP_DIR`
 - Перед запуском создать `.env` по образцу `.env.example`
+- Все параметры можно передать через CLI: `./install.sh --app_dir /opt/mon --node_port 9100`
+
+### Приоритет переменных (высший → низший)
+
+1. **CLI args** — `--app_dir`, `--grafana_port`, `--grafana_user`, `--grafana_password`, `--node_port`
+2. **`.env` / переменные окружения**
+3. **Default values** (встроенные в скрипт)
 
 ## Configuration (.env)
 
