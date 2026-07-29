@@ -78,3 +78,15 @@ fi
 cd "${APP_DIR}" || die "Cannot access ${APP_DIR}"
 
 docker compose up -d
+
+cat > "${APP_DIR}/.env" << EOF
+# fast-monitoring configuration
+APP_DIR=${APP_DIR}
+GRAFANA_PORT=${GRAFANA_PORT}
+GRAFANA_USER=${GRAFANA_USER}
+GRAFANA_PASSWORD=${GRAFANA_PASSWORD}
+NODE_PORT=${NODE_PORT}
+
+# NODE_PORT is baked into prometheus/prometheus.yaml at install time.
+# To change NODE_PORT, edit prometheus/prometheus.yaml directly or re-deploy.
+EOF
