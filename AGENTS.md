@@ -227,6 +227,7 @@ Squash merge must use **"Pull request title and description"** as the default co
 
 - Bash scripts: no strict style rules, shellcheck welcome
 - `VERSION` in `install.sh` is **hardcoded** — do not make it configurable
+- **Version bump**: when an AI makes user-facing changes (fix/feat/refactor) to `install.sh` or `remove.sh`, it must ask permission before bumping `VERSION` as a separate `chore: bump version to vX.Y.Z` commit.
 - All new config must follow the existing `CLI → .env → defaults` precedence
 
 ### Documentation
