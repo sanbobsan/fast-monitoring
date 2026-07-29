@@ -51,8 +51,8 @@ else
     MODE="remote"
 fi
 
-mkdir -p "${APP_DIR}" 2>/dev/null || die "Cannot create ${APP_DIR}. Try: curl ... | sudo bash"
-mkdir -p "${APP_DIR}/prometheus" "${APP_DIR}/grafana" 2>/dev/null || die "Cannot create subdirectories in ${APP_DIR}"
+mkdir -p "${APP_DIR}" 2>/dev/null || die "Cannot create ${APP_DIR}. Re-run with: curl -fSsL ${RAW_BASE}/install.sh | sudo bash"
+mkdir -p "${APP_DIR}/prometheus" "${APP_DIR}/grafana" 2>/dev/null || die "Cannot create subdirectories in ${APP_DIR}. Re-run with: curl -fSsL ${RAW_BASE}/install.sh | sudo bash"
 
 if [ "$MODE" = "local" ]; then
     [ -f ./config/compose.yaml ] || die "Missing ./config/compose.yaml"

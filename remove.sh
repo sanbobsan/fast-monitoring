@@ -25,8 +25,12 @@ export GRAFANA_USER="${GRAFANA_USER:-user}"
 export GRAFANA_PASSWORD="${GRAFANA_PASSWORD:-password}"
 export NODE_PORT="${NODE_PORT:-9100}"
 
+REPO="sanbobsan/fast-monitoring"
+BRANCH="main"
+RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
+
 cd "${APP_DIR}" 2>/dev/null || die "Directory ${APP_DIR} does not exist"
 
 docker compose down -v 2>/dev/null || true
 
-rm -rf "${APP_DIR}" || die "Failed to remove ${APP_DIR}. Try: sudo rm -rf ${APP_DIR}"
+rm -rf "${APP_DIR}" 2>/dev/null || die "Failed to remove ${APP_DIR}. Re-run with: curl -fSsL ${RAW_BASE}/remove.sh | sudo bash"
