@@ -26,6 +26,13 @@
 - `./remove.sh` — удаление: `docker compose down -v` + удаляет `$APP_DIR`
 - Перед запуском создать `.env` по образцу `.env.example`
 - Все параметры можно передать через CLI: `./install.sh --app_dir /opt/mon --node_port 9100`
+- Быстрая установка из интернета (локальные файлы не нужны):
+
+  ```bash
+  curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/install.sh | bash
+  curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/install.sh | bash -s -- --app_dir /opt/mon --node_port 9200
+  curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/remove.sh | bash -s -- --app_dir /opt/mon
+  ```
 
 ### Приоритет переменных (высший → низший)
 

@@ -40,13 +40,37 @@ export GRAFANA_USER="${GRAFANA_USER:-user}"
 export GRAFANA_PASSWORD="${GRAFANA_PASSWORD:-password}"
 export NODE_PORT="${NODE_PORT:-9100}"
 
+REPO="sanbobsan/fast-monitoring"
+BRANCH="main"
+RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
+
+if [ -f "./config/compose.yaml" ]; then
+    MODE="local"
+else
+    MODE="remote"
+fi
+
 mkdir -p "${APP_DIR}"
 mkdir -p "${APP_DIR}/prometheus"
 mkdir -p "${APP_DIR}/grafana"
 
-cp ./config/compose.yaml "${APP_DIR}"
-envsubst < ./config/prometheus.template.yaml > "${APP_DIR}/prometheus/prometheus.yaml"
-cp ./config/grafana/* "${APP_DIR}/grafana/"
+if [ "$MODE" = "local" ]; then
+    cp ./config/compose.yaml "${APP_DIR}"
+else
+    curl -fSsL "$RAW_BASE/config/compose.yaml" -o "${APP_DIR}/compose.yaml"
+fi
+
+if [ "$MODE" = "local" ]; then
+    envsubst < ./config/prometheus.template.yaml > "${APP_DIR}/prometheus/prometheus.yaml"
+else
+    curl -fSsL "$RAW_BASE/config/prometheus.template.yaml" | envsubst > "${APP_DIR}/prometheus/prometheus.yaml"
+fi
+
+if [ "$MODE" = "local" ]; then
+    cp ./config/grafana/* "${APP_DIR}/grafana/"
+else
+    curl -fSsL "$RAW_BASE/config/grafana/datasources.yaml" -o "${APP_DIR}/grafana/datasources.yaml"
+fi
 
 cd "${APP_DIR}"
 docker compose up -d
