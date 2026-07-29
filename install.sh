@@ -93,6 +93,39 @@ cd "${APP_DIR}" || die "Cannot access ${APP_DIR}"
 
 docker compose up -d
 
+echo "Checking Node Exporter connectivity..."
+sleep 5
+if ! docker compose exec -T prometheus wget -qO- -T 5 "http://host.docker.internal:${NODE_PORT}/metrics" >/dev/null 2>&1; then
+    echo ""
+    echo "⚠ Prometheus cannot reach Node Exporter at host.docker.internal:${NODE_PORT}"
+    echo "  This is usually caused by a firewall blocking traffic from the Docker"
+    echo "  bridge network (172.30.0.0/24) to port ${NODE_PORT} on the host."
+    echo ""
+    detected=false
+    if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -qi active; then
+        detected=true
+        echo "  Detected: UFW is active."
+        echo "  Fix it with:"
+        echo "    sudo ufw allow from 172.30.0.0/24 to any port ${NODE_PORT} proto tcp"
+        echo ""
+    fi
+    if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state 2>/dev/null | grep -q running; then
+        detected=true
+        echo "  Detected: firewalld is active."
+        echo "  Fix it with:"
+        echo "    sudo firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=172.30.0.0/24 port port=${NODE_PORT} protocol=tcp accept'"
+        echo "    sudo firewall-cmd --reload"
+        echo ""
+    fi
+    if [ "$detected" = false ]; then
+        echo "  No recognized firewall detected, but the connection failed."
+        echo "  Check your iptables/nftables rules for the Docker bridge."
+        echo ""
+    fi
+    echo "  After applying the fix, run: docker compose restart prometheus"
+    echo ""
+fi
+
 cat > "${APP_DIR}/.env" << EOF
 # fast-monitoring configuration
 APP_DIR=${APP_DIR}
