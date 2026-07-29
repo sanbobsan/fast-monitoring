@@ -62,6 +62,15 @@ REPO="${REPO:-sanbobsan/fast-monitoring}"
 BRANCH="${BRANCH:-main}"
 RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
 
+if [ -d "${APP_DIR}" ] && [ -n "$(ls -A "${APP_DIR}" 2>/dev/null)" ]; then
+    echo "Error: ${APP_DIR} already exists and is not empty." >&2
+    echo "  Choose a different directory or remove it first:" >&2
+    echo "    rm -rf ${APP_DIR}" >&2
+    echo "  If it is a fast-monitoring deployment, use remove.sh:" >&2
+    echo "    curl -fSsL ${RAW_BASE}/remove.sh | sudo bash -s -- --app_dir ${APP_DIR}" >&2
+    exit 1
+fi
+
 if [ -f "./config/compose.yaml" ]; then
     MODE="local"
 else
