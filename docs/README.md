@@ -61,6 +61,7 @@ You can configure the stack in two ways.
 | `--grafana_user` | `GRAFANA_USER` | `user` | Grafana admin login |
 | `--grafana_password` | `GRAFANA_PASSWORD` | `password` | Grafana admin password |
 | `--node_port` | `NODE_PORT` | `9100` | Node Exporter port on Docker bridge |
+| `--dev` | `BRANCH` | `main` | Install from `dev` branch (pre-release testing) |
 
 ### 1. CLI arguments
 
@@ -84,6 +85,12 @@ curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/.env
 curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/install.sh | sudo bash
 # script reads .env from the current directory automatically
 rm -rf /tmp/fm-install  # temp directory can be cleaned up after install
+```
+
+`REPO` and `BRANCH` are not available as CLI flags but can be set via `.env` to install from a custom fork or branch:
+
+```bash
+REPO=myfork/fast-monitoring BRANCH=myfeature ./install.sh
 ```
 
 ### Precedence (highest → lowest)

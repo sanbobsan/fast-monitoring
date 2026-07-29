@@ -22,6 +22,7 @@ while [ $# -gt 0 ]; do
             echo "  --grafana_user USER     Grafana admin user (default: user)"
             echo "  --grafana_password PASS Grafana admin password (default: password)"
             echo "  --node_port PORT        Node exporter port (default: 9100)"
+            echo "  --dev                   Install from dev branch (pre-release)"
             echo "  --help, -h              Show this help"
             exit 0 ;;
         --app_dir)
@@ -44,6 +45,8 @@ while [ $# -gt 0 ]; do
             [ -z "$2" ] && die "--node_port requires a non-empty value"
             [ "${2#-}" != "$2" ] && die "--node_port expects a value, got '$2'"
             NODE_PORT="$2"; shift 2 ;;
+        --dev)
+            BRANCH="dev"; shift ;;
         *) die "Unknown option: $1"
     esac
 done
@@ -55,8 +58,8 @@ export GRAFANA_PASSWORD="${GRAFANA_PASSWORD:-password}"
 export NODE_PORT="${NODE_PORT:-9100}"
 
 VERSION="1.0.0"
-REPO="sanbobsan/fast-monitoring"
-BRANCH="main"
+REPO="${REPO:-sanbobsan/fast-monitoring}"
+BRANCH="${BRANCH:-main}"
 RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
 
 if [ -f "./config/compose.yaml" ]; then
