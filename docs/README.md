@@ -87,7 +87,7 @@ You can configure the stack in two ways.
 | `--grafana_password` | `GRAFANA_PASSWORD` | `password` | Grafana admin password |
 | `--node_port` | `NODE_PORT` | `9100` | Node Exporter port on Docker bridge |
 | `--dev` | `BRANCH` | `main` | Install from `dev` branch (pre-release testing) |
-| `--force` | — | — | Skip `.fast-monitoring` check (remove.sh only) |
+| `--force` | — | — | Skip `.fast-monitoring` check and confirmation (remove.sh only) |
 
 ### 1. CLI arguments
 
@@ -207,10 +207,10 @@ curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/remo
 ```
 
 ```bash
-# force removal without .fast-monitoring check
+# force removal (skips .fast-monitoring check and confirmation)
 curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/remove.sh | sudo bash -s -- --force
 ```
 
 By default, `--app_dir` is `/opt/fast-monitoring`, so it can be omitted when removing the default location.
 
-The script checks for the `.fast-monitoring` marker before deleting to prevent accidental data loss. Use `--force` to skip this check. It stops containers (`docker compose down -v`) and removes the entire deployment directory.
+The script checks for the `.fast-monitoring` marker and asks for confirmation (`yes`) before deleting anything. Use `--force` to skip both. It stops containers (`docker compose down -v`) and removes the entire deployment directory.
