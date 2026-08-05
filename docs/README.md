@@ -86,6 +86,7 @@ You can configure the stack in two ways.
 | `--grafana_user` | `GRAFANA_USER` | `user` | Grafana admin login |
 | `--grafana_password` | `GRAFANA_PASSWORD` | `password` | Grafana admin password |
 | `--node_port` | `NODE_PORT` | `9100` | Node Exporter port on Docker bridge |
+| `--project_name` | `PROJECT_NAME` | `fast-monitoring` | Docker compose project name (prefix for containers, network, volumes) |
 | `--dev` | `BRANCH` | `main` | Install from `dev` branch (pre-release testing) |
 | `--force` | — | — | Skip `.fast-monitoring` check and confirmation (remove.sh only) |
 
@@ -97,7 +98,8 @@ curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/inst
   --node_port 9200 \
   --grafana_port 4000 \
   --grafana_user admin \
-  --grafana_password secret
+  --grafana_password secret \
+  --project_name mon
 ```
 
 ### 2. .env file
@@ -153,6 +155,9 @@ The deployment directory (`/opt/fast-monitoring/` by default) contains everythin
 
 - **GRAFANA_PORT, GRAFANA_USER, GRAFANA_PASSWORD** — edit `$APP_DIR/.env`, then run `docker compose up -d` in the same directory
 - **NODE_PORT** — baked into `prometheus/prometheus.yaml` at install time. To change, re-run `install.sh` or edit `prometheus/prometheus.yaml` manually
+- **PROJECT_NAME** — baked into container names at install time. To change, re-deploy (`install.sh`)
+
+> If you deployed with a custom `--project_name`, prefix manual compose commands with `-p <PROJECT_NAME>` (from `$APP_DIR/.env`), otherwise docker compose would use the `name:` from `compose.yaml` and start a second, conflicting project.
 
 ## Management
 
@@ -188,10 +193,12 @@ Then open `http://localhost:8000` in your browser.
 
 ### Docker Compose project name
 
-The project name is `fast-monitoring`. Use `-p fast-monitoring` if running docker compose from outside the deployment directory:
+The default project name is `fast-monitoring`. Set a custom one with `--project_name` (or `PROJECT_NAME`) to change the prefix of containers, the network, and volumes — e.g. `--project_name mon` produces `mon-prometheus-1`, `mon_net`, `mon_grafana_data`.
+
+`--project-name` (CLI) takes precedence over the `name:` field in `compose.yaml`. Use `-p <PROJECT_NAME>` when running docker compose from outside the deployment directory:
 
 ```bash
-docker compose -f /opt/fast-monitoring/compose.yaml -p fast-monitoring up -d
+docker compose -f /opt/fast-monitoring/compose.yaml -p mon up -d
 ```
 
 ## Removal
@@ -212,5 +219,7 @@ curl -fSsL https://raw.githubusercontent.com/sanbobsan/fast-monitoring/main/remo
 ```
 
 By default, `--app_dir` is `/opt/fast-monitoring`, so it can be omitted when removing the default location.
+
+The project name is read automatically from `$APP_DIR/.env` (or pass `--project_name` to override), so custom names work without extra flags.
 
 The script checks for the `.fast-monitoring` marker and asks for confirmation (`yes`) before deleting anything. Use `--force` to skip both. It stops containers (`docker compose down -v`) and removes the entire deployment directory.

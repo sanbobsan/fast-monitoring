@@ -23,6 +23,7 @@ while [ $# -gt 0 ]; do
             echo "  --grafana_user USER     Grafana admin user (default: user)"
             echo "  --grafana_password PASS Grafana admin password (default: password)"
             echo "  --node_port PORT        Node exporter port (default: 9100)"
+            echo "  --project_name NAME     Docker compose project name (default: fast-monitoring)"
             echo "  --dev                   Install from dev branch (pre-release)"
             echo "  --help, -h              Show this help"
             exit 0 ;;
@@ -46,6 +47,10 @@ while [ $# -gt 0 ]; do
             [ -z "$2" ] && die "--node_port requires a non-empty value"
             [ "${2#-}" != "$2" ] && die "--node_port expects a value, got '$2'"
             NODE_PORT="$2"; shift 2 ;;
+        --project_name)
+            [ -z "$2" ] && die "--project_name requires a non-empty value"
+            [ "${2#-}" != "$2" ] && die "--project_name expects a value, got '$2'"
+            PROJECT_NAME="$2"; shift 2 ;;
         --dev)
             BRANCH="dev"; shift ;;
         *) die "Unknown option: $1"
@@ -57,6 +62,7 @@ export GRAFANA_PORT="${GRAFANA_PORT:-3000}"
 export GRAFANA_USER="${GRAFANA_USER:-user}"
 export GRAFANA_PASSWORD="${GRAFANA_PASSWORD:-password}"
 export NODE_PORT="${NODE_PORT:-9100}"
+export PROJECT_NAME="${PROJECT_NAME:-fast-monitoring}"
 
 REPO="${REPO:-sanbobsan/fast-monitoring}"
 BRANCH="${BRANCH:-main}"
@@ -113,6 +119,7 @@ GRAFANA_PORT=${GRAFANA_PORT}
 GRAFANA_USER=${GRAFANA_USER}
 GRAFANA_PASSWORD=${GRAFANA_PASSWORD}
 NODE_PORT=${NODE_PORT}
+PROJECT_NAME=${PROJECT_NAME}
 
 # NODE_PORT is baked into prometheus/prometheus.yaml at install time.
 # To change NODE_PORT, edit prometheus/prometheus.yaml directly or re-deploy.
@@ -123,15 +130,16 @@ cat > "${APP_DIR}/.fast-monitoring" << EOF
 VERSION=${VERSION}
 INSTALL_DATE=$(date +%Y-%m-%d)
 NODE_PORT=${NODE_PORT}
+PROJECT_NAME=${PROJECT_NAME}
 EOF
 
 cd "${APP_DIR}" || die "Cannot access ${APP_DIR}"
 
-docker compose up -d
+docker compose --project-name "${PROJECT_NAME}" up -d
 
 echo "Checking Node Exporter connectivity..."
 sleep 5
-if ! docker compose exec -T prometheus wget -qO- -T 5 "http://host.docker.internal:${NODE_PORT}/metrics" >/dev/null 2>&1; then
+if ! docker compose --project-name "${PROJECT_NAME}" exec -T prometheus wget -qO- -T 5 "http://host.docker.internal:${NODE_PORT}/metrics" >/dev/null 2>&1; then
     echo ""
     echo "⚠ Prometheus cannot reach Node Exporter at host.docker.internal:${NODE_PORT}"
     echo "  This is usually caused by a firewall blocking traffic from the Docker"
@@ -158,6 +166,6 @@ if ! docker compose exec -T prometheus wget -qO- -T 5 "http://host.docker.intern
         echo "  Check your iptables/nftables rules for the Docker bridge."
         echo ""
     fi
-    echo "  After applying the fix, run: docker compose restart prometheus"
+    echo "  After applying the fix, run: docker compose --project-name \"${PROJECT_NAME}\" restart prometheus"
     echo ""
 fi

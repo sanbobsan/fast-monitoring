@@ -20,6 +20,7 @@ while [ $# -gt 0 ]; do
             echo "Options:"
             echo "  --app_dir DIR           Deployment directory (default: /opt/fast-monitoring)"
             echo "  --force                 Skip .fast-monitoring check and confirmation"
+            echo "  --project_name NAME     Docker compose project name (default: fast-monitoring)"
             echo "  --help, -h              Show this help"
             exit 0 ;;
         --app_dir)
@@ -28,6 +29,10 @@ while [ $# -gt 0 ]; do
             APP_DIR="$2"; shift 2 ;;
         --force)
             FORCE=1; shift ;;
+        --project_name)
+            [ -z "$2" ] && die "--project_name requires a non-empty value"
+            [ "${2#-}" != "$2" ] && die "--project_name expects a value, got '$2'"
+            PROJECT_NAME="$2"; shift 2 ;;
         *) die "Unknown option: $1"
     esac
 done
@@ -45,6 +50,11 @@ RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
 cd "${APP_DIR}" 2>/dev/null || die "Directory ${APP_DIR} does not exist"
 
 [ "$FORCE" = "1" ] || [ -f "${APP_DIR}/.fast-monitoring" ] || die "${APP_DIR} is not a fast-monitoring project (missing .fast-monitoring)"
+
+if [ -z "${PROJECT_NAME:-}" ]; then
+    PROJECT_NAME=$(sed -n 's/^PROJECT_NAME=//p' .env 2>/dev/null | tail -1)
+fi
+PROJECT_NAME="${PROJECT_NAME:-fast-monitoring}"
 
 if [ "$FORCE" != "1" ]; then
     echo ""
@@ -65,6 +75,6 @@ if [ "$FORCE" != "1" ]; then
     fi
 fi
 
-docker compose down -v 2>/dev/null || true
+docker compose --project-name "${PROJECT_NAME}" down -v 2>/dev/null || true
 
 rm -rf "${APP_DIR}" 2>/dev/null || die "Failed to remove ${APP_DIR}. Re-run with: curl -fSsL ${RAW_BASE}/remove.sh | sudo bash"
