@@ -27,6 +27,9 @@ Removal is just as easy — see [Removal](#removal).
 - **Prometheus** — internal, reachable via Docker network
 - **Node Exporter** — collects host metrics
 
+A **Node Exporter Full** dashboard is provisioned automatically — open it in
+Grafana: Dashboards → **Node Exporter Full**.
+
 ## Prerequisites
 
 - Linux server with **Docker** and **Docker Compose** (plugin or standalone)
@@ -140,7 +143,10 @@ The deployment directory (`/opt/fast-monitoring/` by default) contains everythin
 ├── prometheus/
 │   └── prometheus.yaml
 └── grafana/
-    └── datasources.yaml
+    ├── datasources.yaml
+    ├── dashboards.yaml
+    └── dashboards/
+        └── node-exporter-full.json
 ```
 
 ### Changing settings
