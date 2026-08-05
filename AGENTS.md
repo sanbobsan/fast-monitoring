@@ -52,7 +52,7 @@ All options are optional — defaults apply for any omitted value.
 
 ### Variable precedence (highest → lowest)
 
-1. **CLI args** — `--app_dir`, `--grafana_port`, `--grafana_user`, `--grafana_password`, `--node_port`, `--dev`
+1. **CLI args** — `--app_dir`, `--grafana_port`, `--grafana_user`, `--grafana_password`, `--node_port`, `--project_name`, `--dev`
 2. **`.env` / environment variables**
 3. **Built-in defaults**
 
@@ -65,6 +65,7 @@ All options are optional — defaults apply for any omitted value.
 | `--grafana_user` | `GRAFANA_USER` | `user` | Grafana admin login |
 | `--grafana_password` | `GRAFANA_PASSWORD` | `password` | Grafana admin password |
 | `--node_port` | `NODE_PORT` | `9100` | Node Exporter port on Docker bridge |
+| `--project_name` | `PROJECT_NAME` | `fast-monitoring` | Docker compose project name (container prefix) |
 | `--dev` | `BRANCH` | `main` | Install from `dev` branch (pre-release) |
 | _(no flag)_ | `REPO` | `sanbobsan/fast-monitoring` | Fork/repo URL for remote install |
 
@@ -77,7 +78,7 @@ All options are optional — defaults apply for any omitted value.
 ### Network
 
 - Isolated Docker bridge network `172.30.0.0/24`
-- Compose project name: `fast-monitoring`
+- Compose project name: configurable via `--project_name`/`PROJECT_NAME` (default `fast-monitoring`); `--project-name` CLI flag takes precedence over the `name:` field in `compose.yaml`
 
 ### Components
 
