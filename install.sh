@@ -1,4 +1,4 @@
-VERSION="1.1.1"
+VERSION="1.2.0"
 die() { echo "Error: $1" >&2; exit 1; }
 
 if [ -f .env ]; then
@@ -78,7 +78,7 @@ else
 fi
 
 mkdir -p "${APP_DIR}" 2>/dev/null || die "Cannot create ${APP_DIR}. Re-run with: curl -fSsL ${RAW_BASE}/install.sh | sudo bash"
-mkdir -p "${APP_DIR}/prometheus" "${APP_DIR}/grafana" 2>/dev/null || die "Cannot create subdirectories in ${APP_DIR}. Re-run with: curl -fSsL ${RAW_BASE}/install.sh | sudo bash"
+mkdir -p "${APP_DIR}/prometheus" "${APP_DIR}/grafana" "${APP_DIR}/grafana/dashboards" 2>/dev/null || die "Cannot create subdirectories in ${APP_DIR}. Re-run with: curl -fSsL ${RAW_BASE}/install.sh | sudo bash"
 
 if [ "$MODE" = "local" ]; then
     [ -f ./config/compose.yaml ] || die "Missing ./config/compose.yaml"
@@ -95,10 +95,15 @@ else
 fi
 
 if [ "$MODE" = "local" ]; then
-    ls ./config/grafana/*.yaml >/dev/null 2>&1 || die "No grafana datasource files in ./config/grafana/"
-    cp ./config/grafana/* "${APP_DIR}/grafana/" || die "Failed to copy grafana datasource"
+    [ -f ./config/grafana/datasources.yaml ] || die "Missing ./config/grafana/datasources.yaml"
+    [ -f ./config/grafana/dashboards.yaml ] || die "Missing ./config/grafana/dashboards.yaml"
+    ls ./config/grafana/dashboards/*.json >/dev/null 2>&1 || die "No dashboard files in ./config/grafana/dashboards/"
+    cp ./config/grafana/datasources.yaml ./config/grafana/dashboards.yaml "${APP_DIR}/grafana/" || die "Failed to copy grafana provisioning files"
+    cp -r ./config/grafana/dashboards "${APP_DIR}/grafana/" || die "Failed to copy grafana dashboards"
 else
     curl -fSsL "$RAW_BASE/config/grafana/datasources.yaml" -o "${APP_DIR}/grafana/datasources.yaml" || die "Failed to download datasources.yaml"
+    curl -fSsL "$RAW_BASE/config/grafana/dashboards.yaml" -o "${APP_DIR}/grafana/dashboards.yaml" || die "Failed to download dashboards.yaml"
+    curl -fSsL "$RAW_BASE/config/grafana/dashboards/node-exporter-full.json" -o "${APP_DIR}/grafana/dashboards/node-exporter-full.json" || die "Failed to download dashboard"
 fi
 
 cat > "${APP_DIR}/.env" << EOF
