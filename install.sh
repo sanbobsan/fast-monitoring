@@ -10,6 +10,8 @@ if [ -f .env ]; then
     done < .env
 fi
 
+ORIG_ARGS=("$@")
+
 while [ $# -gt 0 ]; do
     case "$1" in
         --help|-h)
@@ -67,6 +69,18 @@ export PROJECT_NAME="${PROJECT_NAME:-fast-monitoring}"
 REPO="${REPO:-sanbobsan/fast-monitoring}"
 BRANCH="${BRANCH:-main}"
 RAW_BASE="https://raw.githubusercontent.com/$REPO/$BRANCH"
+
+if [ "$BRANCH" = "dev" ] && [ "${FM_REDIRECTED:-0}" != "1" ]; then
+    echo "Fetching install.sh from $REPO/dev (--dev)..."
+    tmp=$(mktemp) || die "Cannot create temporary file"
+    DEV_URL="https://raw.githubusercontent.com/${REPO}/dev/install.sh"
+    curl -fSsL "$DEV_URL" -o "$tmp" || { rm -f "$tmp"; die "Failed to download $DEV_URL"; }
+    export FM_REDIRECTED=1
+    bash "$tmp" "${ORIG_ARGS[@]}"
+    status=$?
+    rm -f "$tmp"
+    exit $status
+fi
 
 if [ -d "${APP_DIR}" ] && [ -n "$(ls -A "${APP_DIR}" 2>/dev/null)" ]; then
     echo "Error: ${APP_DIR} already exists and is not empty." >&2

@@ -71,6 +71,8 @@ All options are optional — defaults apply for any omitted value.
 
 `--dev` overrides `BRANCH` from `.env` (CLI > .env).
 
+When `BRANCH=dev`, `install.sh` re-downloads and re-executes itself from the dev branch (`FM_REDIRECTED=1` env guard prevents recursion).
+
 `VERSION` is hardcoded in `install.sh` and is not overridable.
 
 ## Architecture
