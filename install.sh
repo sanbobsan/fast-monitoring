@@ -1,4 +1,4 @@
-VERSION="1.4.0"
+VERSION="1.4.1"
 die() { echo "Error: $1" >&2; exit 1; }
 
 if [ -f .env ]; then
