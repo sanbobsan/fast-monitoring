@@ -87,7 +87,7 @@ You can configure the stack in two ways.
 | `--grafana_password` | `GRAFANA_PASSWORD` | `password` | Grafana admin password |
 | `--node_port` | `NODE_PORT` | `9100` | Node Exporter port on Docker bridge |
 | `--project_name` | `PROJECT_NAME` | `fast-monitoring` | Docker compose project name (prefix for containers, network, volumes) |
-| `--dev` | `BRANCH` | `main` | Install from `dev` branch (pre-release testing) |
+| `--dev` | `BRANCH` | `main` | Install from `dev` branch (pre-release testing). The whole install script is re-fetched from the dev branch, not just config files |
 | `--force` | — | — | Skip `.fast-monitoring` check and confirmation (remove.sh only) |
 
 ### 1. CLI arguments
